@@ -9,7 +9,8 @@ import ComparisonSelectionBar from "@/components/ComparisonSelectionBar";
 import CaseComparisonPanel from "@/components/CaseComparisonPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, X, Loader2, Clock, AlertTriangle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sparkles, X, Loader2, Clock, AlertTriangle, ArrowUpDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserExpertise } from "@/hooks/useUserExpertise";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -52,9 +53,10 @@ const Dashboard = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set());
-  const [yearRange, setYearRange] = useState<[number, number]>([2015, 2024]);
+  const [yearRange, setYearRange] = useState<[number, number]>([2015, 2025]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showRelevantOnly, setShowRelevantOnly] = useState(true);
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "relevance">("newest");
   
   // Case comparison state
   const [selectedCasesForComparison, setSelectedCasesForComparison] = useState<CaseData[]>([]);
@@ -83,7 +85,7 @@ const Dashboard = () => {
 
   const handleClearFilters = () => {
     setSelectedFilters(new Set());
-    setYearRange([2015, 2024]);
+    setYearRange([2015, 2025]);
   };
 
   // Case comparison handlers
@@ -134,6 +136,7 @@ const Dashboard = () => {
       name: c.name,
       citation: c.citation,
       year: c.year,
+      lastHearingDate: (c as any).lastHearingDate ?? undefined,
       court: c.court,
       verdict: c.verdict,
       summary: c.summary,
@@ -216,8 +219,26 @@ const Dashboard = () => {
       });
     }
 
+    // Apply sorting
+    if (sortBy === "newest") {
+      results.sort((a, b) => {
+        const dateA = a.lastHearingDate ? new Date(a.lastHearingDate).getTime() : 0;
+        const dateB = b.lastHearingDate ? new Date(b.lastHearingDate).getTime() : 0;
+        return dateB - dateA; // Descending (newest first)
+      });
+    } else if (sortBy === "oldest") {
+      results.sort((a, b) => {
+        const dateA = a.lastHearingDate ? new Date(a.lastHearingDate).getTime() : 0;
+        const dateB = b.lastHearingDate ? new Date(b.lastHearingDate).getTime() : 0;
+        return dateA - dateB; // Ascending (oldest first)
+      });
+    } else if (sortBy === "relevance") {
+      // Sort by precedent strength (higher is more relevant)
+      results.sort((a, b) => (b.precedent_strength ?? 0) - (a.precedent_strength ?? 0));
+    }
+
     return results;
-  }, [cases, searchTerm, selectedFilters, yearRange, showRelevantOnly, userExpertise, relevantTags]);
+  }, [cases, searchTerm, selectedFilters, yearRange, showRelevantOnly, userExpertise, relevantTags, sortBy]);
 
   if (authLoading || expertiseLoading || profileLoading || adminLoading) {
     return (
@@ -311,7 +332,24 @@ const Dashboard = () => {
             />
           ) : (
             <div className="max-w-6xl mx-auto space-y-6">
-              <SearchBar value={searchTerm} onChange={setSearchTerm} />
+              <div className="flex items-center justify-between gap-4">
+                <SearchBar value={searchTerm} onChange={setSearchTerm} />
+                
+                {/* Sort By Dropdown */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  <Select value={sortBy} onValueChange={(value: "newest" | "oldest" | "relevance") => setSortBy(value)}>
+                    <SelectTrigger className="w-[160px] bg-background border-input">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border border-border shadow-md z-50">
+                      <SelectItem value="newest">Newest Hearing</SelectItem>
+                      <SelectItem value="oldest">Oldest Hearing</SelectItem>
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
               {/* Relevance Toggle */}
               {userExpertise.length > 0 && (

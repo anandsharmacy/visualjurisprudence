@@ -86,7 +86,7 @@ const FilterSidebar = ({
               value={yearRange}
               onValueChange={(value) => onYearRangeChange(value as [number, number])}
               min={2015}
-              max={2024}
+              max={2025}
               step={1}
               className="year-slider"
             />
