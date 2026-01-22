@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { logger } from "@/lib/logger";
 
 export const useUserExpertise = () => {
   const { user } = useAuth();
@@ -21,7 +22,7 @@ export const useUserExpertise = () => {
         .eq("user_id", user.id);
 
       if (error) {
-        console.error("Error fetching expertise:", error);
+        logger.error("Error fetching expertise:", error);
         setExpertise([]);
       } else {
         setExpertise(data?.map((row) => row.expertise) || []);

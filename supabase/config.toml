@@ -1,1 +1,4 @@
 project_id = "mbsyvdzfqqpoxlsdqhgg"
+
+[functions.analyze-case-pdf]
+verify_jwt = false
