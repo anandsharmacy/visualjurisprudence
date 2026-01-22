@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Scale, Mail, Lock, ArrowRight, User, Briefcase, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const EXPERTISE_OPTIONS = [
   "Criminal Cases",
@@ -31,6 +32,7 @@ const EXPERTISE_OPTIONS = [
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,6 +40,13 @@ const Auth = () => {
   const [yearsOfExperience, setYearsOfExperience] = useState("");
   const [selectedExpertise, setSelectedExpertise] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleExpertiseToggle = (expertise: string) => {
     setSelectedExpertise((prev) =>
@@ -72,27 +81,45 @@ const Auth = () => {
 
     setIsLoading(true);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
     if (isSignUp) {
-      // Store user expertise for personalized filtering
-      localStorage.setItem("userExpertise", JSON.stringify(selectedExpertise));
-      localStorage.setItem("userYearsExperience", yearsOfExperience);
-      localStorage.setItem("userName", fullName);
-      
+      const { error } = await signUp(
+        email,
+        password,
+        fullName,
+        parseInt(yearsOfExperience),
+        selectedExpertise
+      );
+
+      if (error) {
+        if (error.message.includes("already registered")) {
+          toast.error("This email is already registered. Please sign in instead.");
+        } else {
+          toast.error(error.message || "Failed to create account");
+        }
+        setIsLoading(false);
+        return;
+      }
+
       toast.success("Account created successfully!", {
         description: "Welcome to Visual Jurisprudence Dashboard",
       });
     } else {
+      const { error } = await signIn(email, password);
+
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast.error("Invalid email or password");
+        } else {
+          toast.error(error.message || "Failed to sign in");
+        }
+        setIsLoading(false);
+        return;
+      }
+
       toast.success("Welcome back!", {
         description: "Redirecting to dashboard...",
       });
     }
-
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 500);
 
     setIsLoading(false);
   };
@@ -104,6 +131,14 @@ const Auth = () => {
     setYearsOfExperience("");
     setSelectedExpertise([]);
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-navy">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
