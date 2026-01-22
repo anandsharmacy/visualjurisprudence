@@ -1,12 +1,21 @@
 import CaseCard, { CaseData } from "@/components/CaseCard";
-import { FileSearch } from "lucide-react";
+import { FileSearch, Scale } from "lucide-react";
 
 interface ResultsGridProps {
   cases: CaseData[];
   searchTerm: string;
+  selectedCaseIds?: Set<string>;
+  onToggleCaseSelect?: (caseData: CaseData) => void;
+  maxSelectionsReached?: boolean;
 }
 
-const ResultsGrid = ({ cases, searchTerm }: ResultsGridProps) => {
+const ResultsGrid = ({ 
+  cases, 
+  searchTerm, 
+  selectedCaseIds = new Set(), 
+  onToggleCaseSelect,
+  maxSelectionsReached = false 
+}: ResultsGridProps) => {
   if (cases.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -27,6 +36,12 @@ const ResultsGrid = ({ cases, searchTerm }: ResultsGridProps) => {
         <p className="text-sm text-muted-foreground">
           Showing <span className="font-semibold text-foreground">{cases.length}</span> result{cases.length !== 1 ? 's' : ''}
         </p>
+        {onToggleCaseSelect && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Scale className="h-4 w-4 text-gold" />
+            <span>Click checkbox to compare cases</span>
+          </div>
+        )}
       </div>
       <div className="grid gap-5 md:grid-cols-1 lg:grid-cols-2">
         {cases.map((caseData, index) => (
@@ -34,6 +49,9 @@ const ResultsGrid = ({ cases, searchTerm }: ResultsGridProps) => {
             key={caseData.id} 
             caseData={caseData} 
             index={index}
+            isSelected={selectedCaseIds.has(caseData.id)}
+            onToggleSelect={onToggleCaseSelect}
+            selectionDisabled={maxSelectionsReached && !selectedCaseIds.has(caseData.id)}
           />
         ))}
       </div>
