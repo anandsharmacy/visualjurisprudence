@@ -1,126 +1,73 @@
-import { useState, useMemo } from "react";
-import Header from "@/components/Header";
-import FilterSidebar from "@/components/FilterSidebar";
-import SearchBar from "@/components/SearchBar";
-import ResultsGrid from "@/components/ResultsGrid";
-import { sampleCases } from "@/data/sampleCases";
+import { useNavigate } from "react-router-dom";
+import { Scale, ArrowRight } from "lucide-react";
 
 const Index = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set());
-  const [yearRange, setYearRange] = useState<[number, number]>([2015, 2024]);
-
-  const handleFilterChange = (filterId: string) => {
-    setSelectedFilters((prev) => {
-      const newFilters = new Set(prev);
-      if (newFilters.has(filterId)) {
-        newFilters.delete(filterId);
-      } else {
-        newFilters.add(filterId);
-      }
-      return newFilters;
-    });
-  };
-
-  const handleClearFilters = () => {
-    setSelectedFilters(new Set());
-    setYearRange([2015, 2024]);
-  };
-
-  const filteredCases = useMemo(() => {
-    let results = sampleCases;
-
-    // Filter by search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      results = results.filter(
-        (c) =>
-          c.name.toLowerCase().includes(term) ||
-          c.citation.toLowerCase().includes(term) ||
-          c.summary.toLowerCase().includes(term) ||
-          c.court.toLowerCase().includes(term)
-      );
-    }
-
-    // Filter by year range
-    results = results.filter(
-      (c) => c.year >= yearRange[0] && c.year <= yearRange[1]
-    );
-
-    // Filter by selected filters (court level and verdict type)
-    if (selectedFilters.size > 0) {
-      results = results.filter((c) => {
-        // Court level filter
-        const courtMap: Record<string, string> = {
-          "Supreme Court": "supreme",
-          "High Court": "high",
-          "Appellate Court": "appellate",
-          "District Court": "district",
-          "State Court": "state",
-        };
-        
-        // Verdict filter
-        const verdictMap: Record<string, string> = {
-          "Allowed": "allowed",
-          "Dismissed": "dismissed",
-          "Remanded": "remanded",
-          "Reversed": "reversed",
-          "Settled": "settled",
-        };
-
-        const courtFilterActive = selectedFilters.has(courtMap[c.court]);
-        const verdictFilterActive = selectedFilters.has(verdictMap[c.verdict]);
-
-        // Check if any court filters are selected
-        const hasCourtFilters = ["supreme", "high", "appellate", "district", "state"].some(
-          (court) => selectedFilters.has(court)
-        );
-        
-        // Check if any verdict filters are selected
-        const hasVerdictFilters = ["allowed", "dismissed", "remanded", "reversed", "settled"].some(
-          (verdict) => selectedFilters.has(verdict)
-        );
-
-        // If both types of filters exist, case must match at least one from each
-        if (hasCourtFilters && hasVerdictFilters) {
-          return courtFilterActive && verdictFilterActive;
-        }
-        
-        // If only court filters exist
-        if (hasCourtFilters) {
-          return courtFilterActive;
-        }
-        
-        // If only verdict filters exist
-        if (hasVerdictFilters) {
-          return verdictFilterActive;
-        }
-
-        return true;
-      });
-    }
-
-    return results;
-  }, [searchTerm, selectedFilters, yearRange]);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <div className="flex flex-1 w-full">
-        <FilterSidebar
-          selectedFilters={selectedFilters}
-          onFilterChange={handleFilterChange}
-          onClearAll={handleClearFilters}
-          yearRange={yearRange}
-          onYearRangeChange={setYearRange}
-        />
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-6xl mx-auto space-y-6">
-            <SearchBar value={searchTerm} onChange={setSearchTerm} />
-            <ResultsGrid cases={filteredCases} searchTerm={searchTerm} />
+      {/* Hero Section */}
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div className="animate-fade-in">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <div className="p-4 bg-navy rounded-full shadow-lg">
+              <Scale className="h-12 w-12 text-gold" />
+            </div>
           </div>
-        </main>
+
+          {/* Title */}
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-navy mb-4 leading-tight">
+            Visual Jurisprudence
+            <br />
+            Dashboard
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-lg text-muted-foreground font-sans max-w-lg mx-auto mb-8">
+            A modern platform for legal research. Search, filter, and cite case law with professional precision.
+          </p>
+
+          {/* CTA Button */}
+          <button
+            onClick={() => navigate("/auth")}
+            className="
+              inline-flex items-center gap-3 px-8 py-4
+              bg-navy text-white font-medium text-lg
+              rounded-lg shadow-lg
+              transition-all duration-300
+              border-2 border-navy
+              hover:border-gold hover:shadow-elevated hover:scale-[1.02]
+            "
+          >
+            <span>Access Dashboard</span>
+            <ArrowRight className="h-5 w-5" />
+          </button>
+
+          {/* Trust indicators */}
+          <div className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-gold" />
+              <span>Institutional-Grade Security</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-gold" />
+              <span>Verified Citations</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-gold" />
+              <span>Comprehensive Database</span>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="py-6 text-center border-t border-border">
+        <p className="text-sm text-muted-foreground">
+          © 2024 Visual Jurisprudence Dashboard. All rights reserved.
+        </p>
+      </footer>
     </div>
   );
 };
