@@ -3,11 +3,8 @@ import { Upload, FileText, Loader2, AlertCircle, CheckCircle2 } from "lucide-rea
 import { toast } from "sonner";
 import * as pdfjsLib from "pdfjs-dist";
 
-// Use the bundled worker from the package
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString();
+// FORCE the worker to load from unpkg to fix version mismatch/bundling errors
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
 
 interface ExtractedCaseData {
   caseName?: string;
