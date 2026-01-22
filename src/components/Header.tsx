@@ -1,4 +1,4 @@
-import { Scale, Plus, LogOut, ShieldAlert } from "lucide-react";
+import { Scale, Plus, LogOut, ShieldAlert, User, Briefcase } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -8,14 +8,23 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 interface HeaderProps {
   onAddCase?: () => void;
   showAddButton?: boolean;
   canAddCases?: boolean;
+  userName?: string;
+  yearsOfExperience?: number | null;
 }
 
-const Header = ({ onAddCase, showAddButton = true, canAddCases = true }: HeaderProps) => {
+const Header = ({ 
+  onAddCase, 
+  showAddButton = true, 
+  canAddCases = true,
+  userName,
+  yearsOfExperience 
+}: HeaderProps) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
 
@@ -23,6 +32,15 @@ const Header = ({ onAddCase, showAddButton = true, canAddCases = true }: HeaderP
     await signOut();
     toast.success("Signed out successfully");
     navigate("/auth");
+  };
+
+  const getExperienceLabel = (years: number | null | undefined) => {
+    if (years === null || years === undefined) return "New Member";
+    if (years <= 2) return "Associate";
+    if (years <= 5) return "Mid-Level";
+    if (years <= 10) return "Senior";
+    if (years <= 20) return "Expert";
+    return "Distinguished";
   };
 
   return (
@@ -35,7 +53,30 @@ const Header = ({ onAddCase, showAddButton = true, canAddCases = true }: HeaderP
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          {/* User Profile Info */}
+          {user && userName && (
+            <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/10 rounded-lg border border-white/20">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-gold" />
+                <span className="text-sm font-medium text-white">{userName}</span>
+              </div>
+              <div className="w-px h-4 bg-white/30" />
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-gold" />
+                <span className="text-sm text-white/80">
+                  {yearsOfExperience ?? 0} {yearsOfExperience === 1 ? 'year' : 'years'}
+                </span>
+              </div>
+              <Badge 
+                variant="secondary" 
+                className="bg-gold/20 text-gold border-gold/30 text-xs"
+              >
+                {getExperienceLabel(yearsOfExperience)}
+              </Badge>
+            </div>
+          )}
+
           {showAddButton && onAddCase && (
             <TooltipProvider>
               <Tooltip>
