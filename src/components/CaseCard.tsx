@@ -31,6 +31,7 @@ interface CaseCardProps {
   isSelected?: boolean;
   onToggleSelect?: (caseData: CaseData) => void;
   selectionDisabled?: boolean;
+  onTrackView?: (caseId: string, tags: string[]) => void;
 }
 
 const verdictStyles: Record<VerdictType, string> = {
@@ -55,7 +56,7 @@ const getVerdictBorderColor = (verdict: string): string => {
   return "bg-slate-400";
 };
 
-const CaseCard = ({ caseData, index = 0, isSelected = false, onToggleSelect, selectionDisabled = false }: CaseCardProps) => {
+const CaseCard = ({ caseData, index = 0, isSelected = false, onToggleSelect, selectionDisabled = false, onTrackView }: CaseCardProps) => {
   const [copied, setCopied] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -66,6 +67,18 @@ const CaseCard = ({ caseData, index = 0, isSelected = false, onToggleSelect, sel
       description: caseData.citation,
     });
     setTimeout(() => setCopied(false), 2000);
+    
+    // Track view when Quick Cite is clicked
+    if (onTrackView && caseData.tags && caseData.tags.length > 0) {
+      onTrackView(caseData.id, caseData.tags);
+    }
+  };
+
+  const handleCardClick = () => {
+    // Track view when card is clicked
+    if (onTrackView && caseData.tags && caseData.tags.length > 0) {
+      onTrackView(caseData.id, caseData.tags);
+    }
   };
 
   const handleSelectClick = (e: React.MouseEvent) => {
@@ -83,7 +96,8 @@ const CaseCard = ({ caseData, index = 0, isSelected = false, onToggleSelect, sel
   return (
     <TooltipProvider>
       <article 
-        className={`bg-card rounded-lg shadow-card hover:shadow-elevated transition-all duration-300 overflow-hidden flex opacity-0 animate-fade-in relative ${isSelected ? 'ring-2 ring-gold ring-offset-2' : ''}`}
+        onClick={handleCardClick}
+        className={`bg-card rounded-lg shadow-card hover:shadow-elevated transition-all duration-300 overflow-hidden flex opacity-0 animate-fade-in relative cursor-pointer ${isSelected ? 'ring-2 ring-gold ring-offset-2' : ''}`}
         style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}

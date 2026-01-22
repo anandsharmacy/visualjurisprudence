@@ -7,6 +7,7 @@ import ResultsGrid from "@/components/ResultsGrid";
 import AddCaseForm from "@/components/AddCaseForm";
 import ComparisonSelectionBar from "@/components/ComparisonSelectionBar";
 import CaseComparisonPanel from "@/components/CaseComparisonPanel";
+import RecommendationsSection from "@/components/RecommendationsSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,6 +17,7 @@ import { useUserExpertise } from "@/hooks/useUserExpertise";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useLegalCases } from "@/hooks/useLegalCases";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { useViewedTags } from "@/hooks/useViewedTags";
 import { CaseData } from "@/components/CaseCard";
 import { toast } from "sonner";
 
@@ -50,6 +52,7 @@ const Dashboard = () => {
   const { profile, isLoading: profileLoading, canAddCases, isPending, isRejected, updateYearsOfExperience } = useUserProfile();
   const { cases, isLoading: casesLoading, addCase } = useLegalCases();
   const { isAdmin, isLoading: adminLoading } = useAdminRole();
+  const { viewedTags, viewedCaseIds, trackCaseView, hasHistory, isInitialized } = useViewedTags();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set());
@@ -119,6 +122,16 @@ const Dashboard = () => {
   const handleCloseComparison = useCallback(() => {
     setShowComparisonPanel(false);
   }, []);
+
+  // Handle recommendation card click
+  const handleRecommendationClick = useCallback((caseData: CaseData) => {
+    if (caseData.tags && caseData.tags.length > 0) {
+      trackCaseView(caseData.id, caseData.tags);
+    }
+    toast.success("Case added to your history", {
+      description: caseData.name,
+    });
+  }, [trackCaseView]);
 
   // Get all tags that match user's expertise
   const relevantTags = useMemo(() => {
@@ -390,6 +403,17 @@ const Dashboard = () => {
                 </div>
               )}
 
+              {/* Recommendations Section */}
+              {isInitialized && (
+                <RecommendationsSection
+                  allCases={filteredCases}
+                  viewedTags={viewedTags}
+                  viewedCaseIds={viewedCaseIds}
+                  onCaseClick={handleRecommendationClick}
+                  isVisible={hasHistory}
+                />
+              )}
+
               {casesLoading ? (
                 <div className="flex justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-navy" />
@@ -401,6 +425,7 @@ const Dashboard = () => {
                   selectedCaseIds={selectedCaseIds}
                   onToggleCaseSelect={handleToggleCaseSelect}
                   maxSelectionsReached={maxSelectionsReached}
+                  onTrackView={trackCaseView}
                 />
               )}
             </div>
