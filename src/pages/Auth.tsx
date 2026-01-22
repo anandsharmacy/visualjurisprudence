@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Scale, Mail, Lock, ArrowRight, User, Briefcase, Calendar } from "lucide-react";
+import { Scale, Mail, Lock, ArrowRight, User, Briefcase, Calendar, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -338,6 +338,39 @@ const Auth = () => {
             </a>
           </p>
         </div>
+
+        {/* Admin Login Section */}
+        {!isSignUp && (
+          <div className="mt-6 pt-6 border-t border-border">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">Admin Access</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                toast.info("Use your admin credentials to sign in above", {
+                  description: "Admin accounts have the same login flow"
+                });
+              }}
+              className="
+                w-full h-12
+                bg-purple-600 text-white font-medium
+                rounded-lg flex items-center justify-center gap-2
+                transition-all duration-200
+                border-2 border-purple-600
+                hover:bg-purple-700 hover:border-purple-500
+              "
+            >
+              <Shield className="h-5 w-5" />
+              <span>Admin Login</span>
+            </button>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              For authorized administrators only
+            </p>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="mt-8 pt-6 border-t border-border text-center">
