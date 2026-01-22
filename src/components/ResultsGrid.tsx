@@ -25,17 +25,16 @@ const ResultsGrid = ({ cases, searchTerm }: ResultsGridProps) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing <span className="font-semibold text-foreground">{cases.length}</span> results
+          Showing <span className="font-semibold text-foreground">{cases.length}</span> result{cases.length !== 1 ? 's' : ''}
         </p>
       </div>
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-1 lg:grid-cols-2">
         {cases.map((caseData, index) => (
-          <div
-            key={caseData.id}
-            style={{ animationDelay: `${index * 50}ms` }}
-          >
-            <CaseCard caseData={caseData} />
-          </div>
+          <CaseCard 
+            key={caseData.id} 
+            caseData={caseData} 
+            index={index}
+          />
         ))}
       </div>
     </div>
