@@ -44,7 +44,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { expertise: userExpertise, isLoading: expertiseLoading } = useUserExpertise();
-  const { profile, isLoading: profileLoading, canAddCases } = useUserProfile();
+  const { profile, isLoading: profileLoading, canAddCases, updateYearsOfExperience } = useUserProfile();
   const { cases, isLoading: casesLoading, addCase } = useLegalCases();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -240,6 +240,7 @@ const Dashboard = () => {
         canAddCases={canAddCases}
         userName={profile?.full_name}
         yearsOfExperience={profile?.years_of_experience}
+        onUpdateExperience={updateYearsOfExperience}
       />
       <div className="flex flex-1 w-full">
         <FilterSidebar
