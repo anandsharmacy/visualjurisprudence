@@ -17,11 +17,16 @@ export type Database = {
       legal_cases: {
         Row: {
           citation: string
+          citation_risk: string | null
+          cited_by_count: number | null
           court: string
           created_at: string
           created_by: string | null
           id: string
           name: string
+          outcome_alignment: string | null
+          precedent_strength: number | null
+          ratio_decidendi: string | null
           summary: string
           tags: string[] | null
           updated_at: string
@@ -30,11 +35,16 @@ export type Database = {
         }
         Insert: {
           citation: string
+          citation_risk?: string | null
+          cited_by_count?: number | null
           court: string
           created_at?: string
           created_by?: string | null
           id?: string
           name: string
+          outcome_alignment?: string | null
+          precedent_strength?: number | null
+          ratio_decidendi?: string | null
           summary: string
           tags?: string[] | null
           updated_at?: string
@@ -43,11 +53,16 @@ export type Database = {
         }
         Update: {
           citation?: string
+          citation_risk?: string | null
+          cited_by_count?: number | null
           court?: string
           created_at?: string
           created_by?: string | null
           id?: string
           name?: string
+          outcome_alignment?: string | null
+          precedent_strength?: number | null
+          ratio_decidendi?: string | null
           summary?: string
           tags?: string[] | null
           updated_at?: string

@@ -91,6 +91,11 @@ const Dashboard = () => {
       verdict: c.verdict,
       summary: c.summary,
       tags: c.tags || [],
+      precedent_strength: c.precedent_strength ?? undefined,
+      citation_risk: (c.citation_risk as 'safe' | 'weak') ?? undefined,
+      outcome_alignment: (c.outcome_alignment as 'plaintiff' | 'defendant' | 'neutral') ?? undefined,
+      ratio_decidendi: c.ratio_decidendi ?? undefined,
+      cited_by_count: c.cited_by_count ?? undefined,
     }));
 
     // Filter by user expertise (relevance) if enabled and user has expertise

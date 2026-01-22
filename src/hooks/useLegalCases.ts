@@ -14,6 +14,11 @@ export interface LegalCase {
   tags: string[];
   created_by: string | null;
   created_at: string;
+  precedent_strength: number | null;
+  citation_risk: string | null;
+  outcome_alignment: string | null;
+  ratio_decidendi: string | null;
+  cited_by_count: number | null;
 }
 
 export const useLegalCases = () => {
