@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Copy, Check, BookOpen, Calendar, Building2, CheckCircle2, AlertTriangle, Quote, Square, CheckSquare } from "lucide-react";
+import { Copy, Check, BookOpen, Calendar, Building2, CheckCircle2, AlertTriangle, Quote, Square, CheckSquare, Gavel } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { format, parseISO } from "date-fns";
 
 export interface CaseData {
   id: string;
@@ -192,6 +193,14 @@ const CaseCard = ({ caseData, index = 0, isSelected = false, onToggleSelect, sel
                 <BookOpen className="h-4 w-4 text-gold" />
                 <span className="font-medium">{caseData.citation}</span>
               </div>
+              {caseData.lastHearingDate && (
+                <div className="flex items-center gap-1.5">
+                  <Gavel className="h-4 w-4 text-gold" />
+                  <span className="font-medium">
+                    {format(parseISO(caseData.lastHearingDate), "MMM d, yyyy")}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 text-gold" />
                 <span>{caseData.year}</span>
