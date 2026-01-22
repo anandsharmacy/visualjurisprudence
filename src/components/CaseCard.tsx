@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, BookOpen, Calendar, Building2, CheckCircle2, AlertTriangle, Quote } from "lucide-react";
+import { Copy, Check, BookOpen, Calendar, Building2, CheckCircle2, AlertTriangle, Quote, Square, CheckSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -26,6 +26,9 @@ type VerdictType = "Allowed" | "Reversed" | "Remanded" | "Dismissed" | "Settled"
 interface CaseCardProps {
   caseData: CaseData;
   index?: number;
+  isSelected?: boolean;
+  onToggleSelect?: (caseData: CaseData) => void;
+  selectionDisabled?: boolean;
 }
 
 const verdictStyles: Record<VerdictType, string> = {
@@ -50,7 +53,7 @@ const getVerdictBorderColor = (verdict: string): string => {
   return "bg-slate-400";
 };
 
-const CaseCard = ({ caseData, index = 0 }: CaseCardProps) => {
+const CaseCard = ({ caseData, index = 0, isSelected = false, onToggleSelect, selectionDisabled = false }: CaseCardProps) => {
   const [copied, setCopied] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -63,6 +66,13 @@ const CaseCard = ({ caseData, index = 0 }: CaseCardProps) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleSelectClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!selectionDisabled && onToggleSelect) {
+      onToggleSelect(caseData);
+    }
+  };
+
   const precedentStrength = caseData.precedent_strength ?? 75;
   const citationRisk = caseData.citation_risk ?? 'safe';
   const outcomeAlignment = caseData.outcome_alignment ?? 'neutral';
@@ -71,11 +81,32 @@ const CaseCard = ({ caseData, index = 0 }: CaseCardProps) => {
   return (
     <TooltipProvider>
       <article 
-        className="bg-card rounded-lg shadow-card hover:shadow-elevated transition-all duration-300 overflow-hidden flex opacity-0 animate-fade-in"
+        className={`bg-card rounded-lg shadow-card hover:shadow-elevated transition-all duration-300 overflow-hidden flex opacity-0 animate-fade-in relative ${isSelected ? 'ring-2 ring-gold ring-offset-2' : ''}`}
         style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+        {/* Selection Checkbox */}
+        {onToggleSelect && (
+          <button
+            onClick={handleSelectClick}
+            disabled={selectionDisabled && !isSelected}
+            className={`absolute top-3 right-3 z-10 p-1.5 rounded-md transition-all duration-200 ${
+              isSelected 
+                ? 'bg-gold text-white' 
+                : selectionDisabled 
+                  ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                  : 'bg-white/90 text-navy hover:bg-gold/20 border border-navy/20'
+            }`}
+          >
+            {isSelected ? (
+              <CheckSquare className="h-5 w-5" />
+            ) : (
+              <Square className="h-5 w-5" />
+            )}
+          </button>
+        )}
+
         {/* Verdict Strip - Left Edge */}
         <div className={`w-1 ${getVerdictBorderColor(caseData.verdict)} flex-shrink-0`} />
         

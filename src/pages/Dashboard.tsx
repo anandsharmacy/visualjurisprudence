@@ -1,15 +1,18 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import FilterSidebar from "@/components/FilterSidebar";
 import SearchBar from "@/components/SearchBar";
 import ResultsGrid from "@/components/ResultsGrid";
 import AddCaseForm from "@/components/AddCaseForm";
+import ComparisonSelectionBar from "@/components/ComparisonSelectionBar";
+import CaseComparisonPanel from "@/components/CaseComparisonPanel";
 import { Button } from "@/components/ui/button";
 import { Sparkles, X, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserExpertise } from "@/hooks/useUserExpertise";
 import { useLegalCases } from "@/hooks/useLegalCases";
+import { CaseData } from "@/components/CaseCard";
 
 // Map expertise areas to case tags
 const expertiseToTagMap: Record<string, string[]> = {
@@ -46,6 +49,12 @@ const Dashboard = () => {
   const [yearRange, setYearRange] = useState<[number, number]>([2015, 2024]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showRelevantOnly, setShowRelevantOnly] = useState(true);
+  
+  // Case comparison state
+  const [selectedCasesForComparison, setSelectedCasesForComparison] = useState<CaseData[]>([]);
+  const [showComparisonPanel, setShowComparisonPanel] = useState(false);
+  const selectedCaseIds = useMemo(() => new Set(selectedCasesForComparison.map(c => c.id)), [selectedCasesForComparison]);
+  const maxSelectionsReached = selectedCasesForComparison.length >= 3;
 
   // Redirect if not logged in
   useEffect(() => {
@@ -70,6 +79,38 @@ const Dashboard = () => {
     setSelectedFilters(new Set());
     setYearRange([2015, 2024]);
   };
+
+  // Case comparison handlers
+  const handleToggleCaseSelect = useCallback((caseData: CaseData) => {
+    setSelectedCasesForComparison(prev => {
+      const isAlreadySelected = prev.some(c => c.id === caseData.id);
+      if (isAlreadySelected) {
+        return prev.filter(c => c.id !== caseData.id);
+      }
+      if (prev.length >= 3) {
+        return prev; // Max 3 selections
+      }
+      return [...prev, caseData];
+    });
+  }, []);
+
+  const handleClearCaseSelection = useCallback(() => {
+    setSelectedCasesForComparison([]);
+  }, []);
+
+  const handleRemoveCaseFromSelection = useCallback((caseId: string) => {
+    setSelectedCasesForComparison(prev => prev.filter(c => c.id !== caseId));
+  }, []);
+
+  const handleOpenComparison = useCallback(() => {
+    if (selectedCasesForComparison.length >= 2) {
+      setShowComparisonPanel(true);
+    }
+  }, [selectedCasesForComparison.length]);
+
+  const handleCloseComparison = useCallback(() => {
+    setShowComparisonPanel(false);
+  }, []);
 
   // Get all tags that match user's expertise
   const relevantTags = useMemo(() => {
@@ -251,12 +292,35 @@ const Dashboard = () => {
                   <Loader2 className="h-8 w-8 animate-spin text-navy" />
                 </div>
               ) : (
-                <ResultsGrid cases={filteredCases} searchTerm={searchTerm} />
+                <ResultsGrid 
+                  cases={filteredCases} 
+                  searchTerm={searchTerm}
+                  selectedCaseIds={selectedCaseIds}
+                  onToggleCaseSelect={handleToggleCaseSelect}
+                  maxSelectionsReached={maxSelectionsReached}
+                />
               )}
             </div>
           )}
         </main>
       </div>
+
+      {/* Comparison Selection Bar */}
+      <ComparisonSelectionBar
+        selectedCases={selectedCasesForComparison}
+        onClearSelection={handleClearCaseSelection}
+        onCompare={handleOpenComparison}
+        onRemoveCase={handleRemoveCaseFromSelection}
+      />
+
+      {/* Comparison Panel Modal */}
+      {showComparisonPanel && (
+        <CaseComparisonPanel
+          selectedCases={selectedCasesForComparison}
+          onClose={handleCloseComparison}
+          onRemoveCase={handleRemoveCaseFromSelection}
+        />
+      )}
     </div>
   );
 };
