@@ -14,7 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      legal_cases: {
+        Row: {
+          citation: string
+          court: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          summary: string
+          tags: string[] | null
+          updated_at: string
+          verdict: string
+          year: number
+        }
+        Insert: {
+          citation: string
+          court: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          summary: string
+          tags?: string[] | null
+          updated_at?: string
+          verdict: string
+          year: number
+        }
+        Update: {
+          citation?: string
+          court?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          summary?: string
+          tags?: string[] | null
+          updated_at?: string
+          verdict?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          updated_at: string
+          user_id: string
+          years_of_experience: number | null
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          years_of_experience?: number | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          years_of_experience?: number | null
+        }
+        Relationships: []
+      }
+      user_expertise: {
+        Row: {
+          created_at: string
+          expertise: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expertise: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expertise?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

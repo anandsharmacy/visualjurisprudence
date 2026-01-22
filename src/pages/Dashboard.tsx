@@ -1,12 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import FilterSidebar from "@/components/FilterSidebar";
 import SearchBar from "@/components/SearchBar";
 import ResultsGrid from "@/components/ResultsGrid";
 import AddCaseForm from "@/components/AddCaseForm";
-import { sampleCases } from "@/data/sampleCases";
 import { Button } from "@/components/ui/button";
-import { Sparkles, X } from "lucide-react";
+import { Sparkles, X, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserExpertise } from "@/hooks/useUserExpertise";
+import { useLegalCases } from "@/hooks/useLegalCases";
 
 // Map expertise areas to case tags
 const expertiseToTagMap: Record<string, string[]> = {
@@ -33,23 +36,23 @@ const expertiseToTagMap: Record<string, string[]> = {
 };
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const { user, isLoading: authLoading } = useAuth();
+  const { expertise: userExpertise, isLoading: expertiseLoading } = useUserExpertise();
+  const { cases, isLoading: casesLoading, addCase } = useLegalCases();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set());
   const [yearRange, setYearRange] = useState<[number, number]>([2015, 2024]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showRelevantOnly, setShowRelevantOnly] = useState(true);
-  const [userExpertise, setUserExpertise] = useState<string[]>([]);
 
+  // Redirect if not logged in
   useEffect(() => {
-    const stored = localStorage.getItem("userExpertise");
-    if (stored) {
-      try {
-        setUserExpertise(JSON.parse(stored));
-      } catch {
-        setUserExpertise([]);
-      }
+    if (!authLoading && !user) {
+      navigate("/auth");
     }
-  }, []);
+  }, [user, authLoading, navigate]);
 
   const handleFilterChange = (filterId: string) => {
     setSelectedFilters((prev) => {
@@ -79,7 +82,16 @@ const Dashboard = () => {
   }, [userExpertise]);
 
   const filteredCases = useMemo(() => {
-    let results = sampleCases;
+    let results = cases.map((c) => ({
+      id: c.id,
+      name: c.name,
+      citation: c.citation,
+      year: c.year,
+      court: c.court,
+      verdict: c.verdict,
+      summary: c.summary,
+      tags: c.tags || [],
+    }));
 
     // Filter by user expertise (relevance) if enabled and user has expertise
     if (showRelevantOnly && userExpertise.length > 0 && relevantTags.size > 0) {
@@ -109,7 +121,6 @@ const Dashboard = () => {
     // Filter by selected filters (court level and verdict type)
     if (selectedFilters.size > 0) {
       results = results.filter((c) => {
-        // Court level filter
         const courtMap: Record<string, string> = {
           "Supreme Court": "supreme",
           "High Court": "high",
@@ -117,8 +128,7 @@ const Dashboard = () => {
           "District Court": "district",
           "State Court": "state",
         };
-        
-        // Verdict filter
+
         const verdictMap: Record<string, string> = {
           "Allowed": "allowed",
           "Dismissed": "dismissed",
@@ -130,27 +140,22 @@ const Dashboard = () => {
         const courtFilterActive = selectedFilters.has(courtMap[c.court]);
         const verdictFilterActive = selectedFilters.has(verdictMap[c.verdict]);
 
-        // Check if any court filters are selected
         const hasCourtFilters = ["supreme", "high", "appellate", "district", "state"].some(
           (court) => selectedFilters.has(court)
         );
-        
-        // Check if any verdict filters are selected
+
         const hasVerdictFilters = ["allowed", "dismissed", "remanded", "reversed", "settled"].some(
           (verdict) => selectedFilters.has(verdict)
         );
 
-        // If both types of filters exist, case must match at least one from each
         if (hasCourtFilters && hasVerdictFilters) {
           return courtFilterActive && verdictFilterActive;
         }
-        
-        // If only court filters exist
+
         if (hasCourtFilters) {
           return courtFilterActive;
         }
-        
-        // If only verdict filters exist
+
         if (hasVerdictFilters) {
           return verdictFilterActive;
         }
@@ -160,12 +165,20 @@ const Dashboard = () => {
     }
 
     return results;
-  }, [searchTerm, selectedFilters, yearRange, showRelevantOnly, userExpertise, relevantTags]);
+  }, [cases, searchTerm, selectedFilters, yearRange, showRelevantOnly, userExpertise, relevantTags]);
+
+  if (authLoading || expertiseLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-navy" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header 
-        onAddCase={() => setShowAddForm(true)} 
+      <Header
+        onAddCase={() => setShowAddForm(true)}
         showAddButton={!showAddForm}
       />
       <div className="flex flex-1 w-full">
@@ -180,12 +193,15 @@ const Dashboard = () => {
           {showAddForm ? (
             <AddCaseForm
               onCancel={() => setShowAddForm(false)}
-              onSubmit={() => setShowAddForm(false)}
+              onSubmit={async (caseData) => {
+                await addCase(caseData);
+                setShowAddForm(false);
+              }}
             />
           ) : (
             <div className="max-w-6xl mx-auto space-y-6">
               <SearchBar value={searchTerm} onChange={setSearchTerm} />
-              
+
               {/* Relevance Toggle */}
               {userExpertise.length > 0 && (
                 <div className="flex items-center gap-3">
@@ -224,8 +240,14 @@ const Dashboard = () => {
                   )}
                 </div>
               )}
-              
-              <ResultsGrid cases={filteredCases} searchTerm={searchTerm} />
+
+              {casesLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-navy" />
+                </div>
+              ) : (
+                <ResultsGrid cases={filteredCases} searchTerm={searchTerm} />
+              )}
             </div>
           )}
         </main>

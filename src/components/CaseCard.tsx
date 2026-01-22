@@ -9,22 +9,28 @@ export interface CaseData {
   citation: string;
   year: number;
   court: string;
-  verdict: "Allowed" | "Reversed" | "Remanded" | "Dismissed" | "Settled";
+  verdict: string;
   summary: string;
   tags?: string[];
 }
+
+type VerdictType = "Allowed" | "Reversed" | "Remanded" | "Dismissed" | "Settled";
 
 interface CaseCardProps {
   caseData: CaseData;
   index?: number;
 }
 
-const verdictStyles: Record<CaseData["verdict"], string> = {
+const verdictStyles: Record<VerdictType, string> = {
   Allowed: "bg-gold text-white border-gold",
   Reversed: "bg-red-600 text-white border-red-600",
   Remanded: "bg-amber-600 text-white border-amber-600",
   Dismissed: "bg-slate-500 text-white border-slate-500",
   Settled: "bg-blue-600 text-white border-blue-600",
+};
+
+const getVerdictStyle = (verdict: string): string => {
+  return verdictStyles[verdict as VerdictType] || "bg-slate-400 text-white border-slate-400";
 };
 
 const CaseCard = ({ caseData, index = 0 }: CaseCardProps) => {
@@ -51,7 +57,7 @@ const CaseCard = ({ caseData, index = 0 }: CaseCardProps) => {
         {/* Verdict Badge - Top Left */}
         <div className="flex items-center gap-2 mb-4">
           <Badge
-            className={`font-semibold text-xs uppercase tracking-wider px-3 py-1 ${verdictStyles[caseData.verdict]}`}
+            className={`font-semibold text-xs uppercase tracking-wider px-3 py-1 ${getVerdictStyle(caseData.verdict)}`}
           >
             {caseData.verdict}
           </Badge>

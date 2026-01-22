@@ -14,7 +14,15 @@ import { toast } from "sonner";
 
 interface AddCaseFormProps {
   onCancel: () => void;
-  onSubmit: () => void;
+  onSubmit: (caseData: {
+    name: string;
+    citation: string;
+    year: number;
+    court: string;
+    verdict: string;
+    summary: string;
+    tags?: string[];
+  }) => Promise<void>;
 }
 
 const AddCaseForm = ({ onCancel, onSubmit }: AddCaseFormProps) => {
@@ -25,6 +33,7 @@ const AddCaseForm = ({ onCancel, onSubmit }: AddCaseFormProps) => {
     court: "",
     verdict: "",
     summary: "",
+    tags: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,7 +44,6 @@ const AddCaseForm = ({ onCancel, onSubmit }: AddCaseFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate required fields
     if (!formData.caseName || !formData.citation || !formData.year || !formData.court || !formData.verdict || !formData.summary) {
       toast.error("Please fill in all required fields");
       return;
@@ -43,15 +51,25 @@ const AddCaseForm = ({ onCancel, onSubmit }: AddCaseFormProps) => {
 
     setIsSubmitting(true);
 
-    // Simulate submission delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      await onSubmit({
+        name: formData.caseName,
+        citation: formData.citation,
+        year: parseInt(formData.year),
+        court: formData.court,
+        verdict: formData.verdict,
+        summary: formData.summary,
+        tags: formData.tags ? formData.tags.split(",").map((t) => t.trim()) : [],
+      });
 
-    toast.success("Case Submitted Successfully!", {
-      description: `"${formData.caseName}" has been added to the database.`,
-    });
-
-    setIsSubmitting(false);
-    onSubmit();
+      toast.success("Case Submitted Successfully!", {
+        description: `"${formData.caseName}" has been added to the database.`,
+      });
+    } catch (error) {
+      console.error("Error submitting case:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -159,6 +177,21 @@ const AddCaseForm = ({ onCancel, onSubmit }: AddCaseFormProps) => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label htmlFor="tags" className="text-navy font-medium">
+              Tags (comma-separated)
+            </Label>
+            <Input
+              id="tags"
+              type="text"
+              placeholder="e.g., Constitutional Law, Civil Rights"
+              value={formData.tags}
+              onChange={(e) => handleInputChange("tags", e.target.value)}
+              className="h-12 border-2 border-navy/20 focus:border-navy bg-white"
+            />
           </div>
 
           {/* Case Summary */}
