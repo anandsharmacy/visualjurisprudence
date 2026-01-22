@@ -61,11 +61,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (data.user) {
+      // Determine approval status - users with 5+ years need admin approval
+      const approvalStatus = yearsOfExperience > 5 ? "pending" : "approved";
+
       // Create profile
       const { error: profileError } = await supabase.from("profiles").insert({
         user_id: data.user.id,
         full_name: fullName,
         years_of_experience: yearsOfExperience,
+        approval_status: approvalStatus,
       });
 
       if (profileError) {

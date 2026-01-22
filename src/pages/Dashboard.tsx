@@ -8,11 +8,13 @@ import AddCaseForm from "@/components/AddCaseForm";
 import ComparisonSelectionBar from "@/components/ComparisonSelectionBar";
 import CaseComparisonPanel from "@/components/CaseComparisonPanel";
 import { Button } from "@/components/ui/button";
-import { Sparkles, X, Loader2, ShieldAlert } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sparkles, X, Loader2, Clock, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserExpertise } from "@/hooks/useUserExpertise";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useLegalCases } from "@/hooks/useLegalCases";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { CaseData } from "@/components/CaseCard";
 import { toast } from "sonner";
 
@@ -44,8 +46,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { expertise: userExpertise, isLoading: expertiseLoading } = useUserExpertise();
-  const { profile, isLoading: profileLoading, canAddCases, updateYearsOfExperience } = useUserProfile();
+  const { profile, isLoading: profileLoading, canAddCases, isPending, isRejected, updateYearsOfExperience } = useUserProfile();
   const { cases, isLoading: casesLoading, addCase } = useLegalCases();
+  const { isAdmin, isLoading: adminLoading } = useAdminRole();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set());
@@ -216,10 +219,56 @@ const Dashboard = () => {
     return results;
   }, [cases, searchTerm, selectedFilters, yearRange, showRelevantOnly, userExpertise, relevantTags]);
 
-  if (authLoading || expertiseLoading || profileLoading) {
+  if (authLoading || expertiseLoading || profileLoading || adminLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-navy" />
+      </div>
+    );
+  }
+
+  // Show pending/rejected status messages
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header userName={profile?.full_name} yearsOfExperience={profile?.years_of_experience} showAddButton={false} />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <Card className="max-w-md border-amber-200 bg-amber-50">
+            <CardHeader className="text-center">
+              <Clock className="h-12 w-12 text-amber-500 mx-auto mb-2" />
+              <CardTitle className="text-xl font-serif text-navy">Account Pending Approval</CardTitle>
+              <CardDescription>
+                Your account with {profile?.years_of_experience}+ years of experience requires admin approval.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center text-sm text-muted-foreground">
+              <p>You will receive access once an administrator reviews and approves your account.</p>
+              <p className="mt-2">This typically takes 1-2 business days.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (isRejected) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header userName={profile?.full_name} yearsOfExperience={profile?.years_of_experience} showAddButton={false} />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <Card className="max-w-md border-red-200 bg-red-50">
+            <CardHeader className="text-center">
+              <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-2" />
+              <CardTitle className="text-xl font-serif text-navy">Account Not Approved</CardTitle>
+              <CardDescription>
+                Your account application has been reviewed and was not approved.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center text-sm text-muted-foreground">
+              <p>Please contact support if you believe this was an error.</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -241,6 +290,7 @@ const Dashboard = () => {
         userName={profile?.full_name}
         yearsOfExperience={profile?.years_of_experience}
         onUpdateExperience={updateYearsOfExperience}
+        isAdmin={isAdmin}
       />
       <div className="flex flex-1 w-full">
         <FilterSidebar

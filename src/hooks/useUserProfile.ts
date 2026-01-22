@@ -9,6 +9,7 @@ export interface UserProfile {
   user_id: string;
   full_name: string;
   years_of_experience: number | null;
+  approval_status: string;
   created_at: string;
   updated_at: string;
 }
@@ -65,7 +66,9 @@ export const useUserProfile = () => {
     toast.success("Profile updated successfully");
   }, [user, profile]);
 
-  const canAddCases = (profile?.years_of_experience ?? 0) > 5;
+  const canAddCases = (profile?.years_of_experience ?? 0) > 5 && profile?.approval_status === "approved";
+  const isPending = profile?.approval_status === "pending";
+  const isRejected = profile?.approval_status === "rejected";
 
-  return { profile, isLoading, canAddCases, updateYearsOfExperience, refetch: fetchProfile };
+  return { profile, isLoading, canAddCases, isPending, isRejected, updateYearsOfExperience, refetch: fetchProfile };
 };
