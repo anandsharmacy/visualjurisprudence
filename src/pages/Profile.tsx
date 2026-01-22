@@ -221,35 +221,25 @@ const Profile = () => {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <Briefcase className="h-5 w-5 text-gold" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Experience</p>
-                      <p className="font-medium text-navy">
-                        {profile?.years_of_experience ?? 0} {profile?.years_of_experience === 1 ? 'year' : 'years'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <Calendar className="h-5 w-5 text-gold" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Member Since</p>
-                      <p className="font-medium text-navy">
-                        {profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "—"}
-                      </p>
-                    </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Briefcase className="h-5 w-5 text-gold" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Experience</p>
+                    <p className="font-medium text-navy">
+                      {profile?.years_of_experience ?? 0} {profile?.years_of_experience === 1 ? 'year' : 'years'}
+                    </p>
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsEditing(true)}
-                  className="border-navy/20 text-navy hover:bg-navy/5"
-                >
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Calendar className="h-5 w-5 text-gold" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Member Since</p>
+                    <p className="font-medium text-navy">
+                      {profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "—"}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </CardContent>
