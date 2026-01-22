@@ -146,6 +146,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_view_history: {
+        Row: {
+          case_id: string
+          id: string
+          tags: string[]
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          case_id: string
+          id?: string
+          tags?: string[]
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          case_id?: string
+          id?: string
+          tags?: string[]
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
