@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { X, Upload, FileText, Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import CaseCardPreview from "./CaseCardPreview";
 import SuccessModal from "./SuccessModal";
+import PdfDropzone from "./PdfDropzone";
 
 interface AddCaseFormProps {
   onCancel: () => void;
@@ -62,6 +63,50 @@ const AddCaseForm = ({ onCancel, onSubmit }: AddCaseFormProps) => {
   const handleSliderChange = (value: number[]) => {
     setFormData((prev) => ({ ...prev, precedentStrength: value[0] }));
   };
+
+  // Handle PDF extracted data
+  const handlePdfDataExtracted = useCallback((data: {
+    caseName?: string;
+    citation?: string;
+    year?: number;
+    courtLevel?: string;
+    verdict?: string;
+    summary?: string;
+    ratioDecidendi?: string;
+    precedentStrength?: number;
+    citationRisk?: string;
+    outcomeAlignment?: string;
+    tags?: string[];
+  }) => {
+    setFormData((prev) => ({
+      ...prev,
+      caseName: data.caseName || prev.caseName,
+      citation: data.citation || prev.citation,
+      year: data.year?.toString() || prev.year,
+      court: data.courtLevel || prev.court,
+      verdict: data.verdict || prev.verdict,
+      summary: data.summary || prev.summary,
+      ratioDecidendi: data.ratioDecidendi || prev.ratioDecidendi,
+      precedentStrength: data.precedentStrength ?? prev.precedentStrength,
+      tags: data.tags?.join(", ") || prev.tags,
+      // Map citationRisk to display format
+      citationRisk: data.citationRisk === "safe" 
+        ? "🟢 Safe to Cite" 
+        : data.citationRisk === "caution" 
+          ? "🟡 Use with Caution" 
+          : data.citationRisk === "weak" 
+            ? "🔴 Weak / Overruled" 
+            : prev.citationRisk,
+      // Map outcomeAlignment to display format
+      outcomeAlignment: data.outcomeAlignment === "plaintiff"
+        ? "Supports Plaintiff"
+        : data.outcomeAlignment === "defendant"
+          ? "Supports Defendant"
+          : data.outcomeAlignment === "neutral"
+            ? "Neutral/Mixed"
+            : prev.outcomeAlignment,
+    }));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,6 +217,15 @@ const AddCaseForm = ({ onCancel, onSubmit }: AddCaseFormProps) => {
         <div className={`grid gap-6 ${showPreview ? 'lg:grid-cols-5' : 'lg:grid-cols-1 max-w-3xl'}`}>
           {/* Left Column - Form (60%) */}
           <form onSubmit={handleSubmit} className={`bg-card rounded-xl shadow-card p-8 ${showPreview ? 'lg:col-span-3' : ''}`}>
+            {/* Section: PDF Upload */}
+            <div className="mb-8">
+              <h3 className="font-serif text-xl text-gold font-semibold mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 bg-gold rounded-full" />
+                AI-Powered Auto-Fill
+              </h3>
+              <PdfDropzone onDataExtracted={handlePdfDataExtracted} />
+            </div>
+
             {/* Section: Core Identity */}
             <div className="mb-8">
               <h3 className="font-serif text-xl text-gold font-semibold mb-4 flex items-center gap-2">
