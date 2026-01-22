@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Scale, Plus, LogOut, ShieldAlert, User, Briefcase, Pencil } from "lucide-react";
+import { Scale, Plus, LogOut, ShieldAlert, User, Briefcase, UserCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -66,37 +66,50 @@ const Header = ({
           </div>
 
           <div className="flex items-center gap-4">
-            {/* User Profile Info - Clickable to edit */}
+            {/* User Profile Info */}
             {user && userName && (
+              <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/10 rounded-lg border border-white/20">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-gold" />
+                  <span className="text-sm font-medium text-white">{userName}</span>
+                </div>
+                <div className="w-px h-4 bg-white/30" />
+                <div className="flex items-center gap-2">
+                  <Briefcase className="h-4 w-4 text-gold" />
+                  <span className="text-sm text-white/80">
+                    {yearsOfExperience ?? 0} {yearsOfExperience === 1 ? 'year' : 'years'}
+                  </span>
+                </div>
+                <Badge 
+                  variant="secondary" 
+                  className="bg-gold/20 text-gold border-gold/30 text-xs"
+                >
+                  {getExperienceLabel(yearsOfExperience)}
+                </Badge>
+              </div>
+            )}
+
+            {/* View Profile Button */}
+            {user && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => setShowEditDialog(true)}
-                      className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/10 rounded-lg border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-200 group"
+                      onClick={() => navigate("/profile")}
+                      className="
+                        flex items-center gap-2 px-3 py-2.5
+                        bg-transparent text-gold font-medium
+                        border-2 border-gold/50 rounded-lg
+                        transition-all duration-200
+                        hover:bg-gold hover:text-navy hover:border-gold
+                      "
                     >
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-gold" />
-                        <span className="text-sm font-medium text-white">{userName}</span>
-                      </div>
-                      <div className="w-px h-4 bg-white/30" />
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="h-4 w-4 text-gold" />
-                        <span className="text-sm text-white/80">
-                          {yearsOfExperience ?? 0} {yearsOfExperience === 1 ? 'year' : 'years'}
-                        </span>
-                      </div>
-                      <Badge 
-                        variant="secondary" 
-                        className="bg-gold/20 text-gold border-gold/30 text-xs"
-                      >
-                        {getExperienceLabel(yearsOfExperience)}
-                      </Badge>
-                      <Pencil className="h-3 w-3 text-white/50 group-hover:text-gold transition-colors" />
+                      <UserCircle className="h-5 w-5" />
+                      <span className="hidden lg:inline">Profile</span>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="bg-navy text-white">
-                    <p>Click to edit your profile</p>
+                    <p>View your profile</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
