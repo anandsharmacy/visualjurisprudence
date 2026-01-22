@@ -8,11 +8,13 @@ import AddCaseForm from "@/components/AddCaseForm";
 import ComparisonSelectionBar from "@/components/ComparisonSelectionBar";
 import CaseComparisonPanel from "@/components/CaseComparisonPanel";
 import { Button } from "@/components/ui/button";
-import { Sparkles, X, Loader2 } from "lucide-react";
+import { Sparkles, X, Loader2, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserExpertise } from "@/hooks/useUserExpertise";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { useLegalCases } from "@/hooks/useLegalCases";
 import { CaseData } from "@/components/CaseCard";
+import { toast } from "sonner";
 
 // Map expertise areas to case tags
 const expertiseToTagMap: Record<string, string[]> = {
@@ -42,6 +44,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { expertise: userExpertise, isLoading: expertiseLoading } = useUserExpertise();
+  const { profile, isLoading: profileLoading, canAddCases } = useUserProfile();
   const { cases, isLoading: casesLoading, addCase } = useLegalCases();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -213,7 +216,7 @@ const Dashboard = () => {
     return results;
   }, [cases, searchTerm, selectedFilters, yearRange, showRelevantOnly, userExpertise, relevantTags]);
 
-  if (authLoading || expertiseLoading) {
+  if (authLoading || expertiseLoading || profileLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-navy" />
@@ -221,11 +224,20 @@ const Dashboard = () => {
     );
   }
 
+  const handleAddCase = () => {
+    if (!canAddCases) {
+      toast.error("You need more than 5 years of experience to add cases");
+      return;
+    }
+    setShowAddForm(true);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header
-        onAddCase={() => setShowAddForm(true)}
+        onAddCase={handleAddCase}
         showAddButton={!showAddForm}
+        canAddCases={canAddCases}
       />
       <div className="flex flex-1 w-full">
         <FilterSidebar
