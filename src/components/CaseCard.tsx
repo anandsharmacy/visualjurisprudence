@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Copy, Check, BookOpen, Calendar, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export interface CaseData {
@@ -10,7 +9,7 @@ export interface CaseData {
   citation: string;
   year: number;
   court: string;
-  verdict: "Affirmed" | "Reversed" | "Remanded" | "Dismissed" | "Settled";
+  verdict: "Allowed" | "Reversed" | "Remanded" | "Dismissed" | "Settled";
   summary: string;
 }
 
@@ -19,15 +18,16 @@ interface CaseCardProps {
 }
 
 const verdictStyles: Record<CaseData["verdict"], string> = {
-  Affirmed: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  Reversed: "bg-red-100 text-red-800 border-red-200",
-  Remanded: "bg-amber-100 text-amber-800 border-amber-200",
-  Dismissed: "bg-slate-100 text-slate-800 border-slate-200",
-  Settled: "bg-blue-100 text-blue-800 border-blue-200",
+  Allowed: "bg-gold text-white border-gold",
+  Reversed: "bg-red-600 text-white border-red-600",
+  Remanded: "bg-amber-600 text-white border-amber-600",
+  Dismissed: "bg-slate-500 text-white border-slate-500",
+  Settled: "bg-blue-600 text-white border-blue-600",
 };
 
 const CaseCard = ({ caseData }: CaseCardProps) => {
   const [copied, setCopied] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const formatCitation = () => {
     return `${caseData.name}, ${caseData.citation} (${caseData.year})`;
@@ -44,63 +44,70 @@ const CaseCard = ({ caseData }: CaseCardProps) => {
   };
 
   return (
-    <article className="bg-card rounded-lg shadow-card hover:shadow-elevated transition-shadow duration-300 overflow-hidden gold-border-left animate-fade-in">
+    <article 
+      className="bg-card rounded-lg shadow-card hover:shadow-elevated transition-all duration-300 overflow-hidden animate-fade-in border-t-4 border-t-gold"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div className="p-5">
-        <div className="flex items-start justify-between gap-4 mb-3">
-          <h3 className="font-serif font-semibold text-lg text-foreground leading-tight">
-            {caseData.name}
-          </h3>
+        {/* Verdict Badge - Top Left */}
+        <div className="mb-4">
           <Badge
-            variant="outline"
-            className={`shrink-0 font-medium ${verdictStyles[caseData.verdict]}`}
+            className={`font-semibold text-xs uppercase tracking-wider px-3 py-1 ${verdictStyles[caseData.verdict]}`}
           >
             {caseData.verdict}
           </Badge>
         </div>
 
+        {/* Case Title - Navy Serif */}
+        <h3 className="font-serif font-bold text-xl text-navy leading-tight mb-3">
+          {caseData.name}
+        </h3>
+
+        {/* Meta Information */}
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
           <div className="flex items-center gap-1.5">
-            <BookOpen className="h-4 w-4" />
+            <BookOpen className="h-4 w-4 text-gold" />
             <span>{caseData.citation}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4" />
+            <Calendar className="h-4 w-4 text-gold" />
             <span>{caseData.year}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Building2 className="h-4 w-4" />
+            <Building2 className="h-4 w-4 text-gold" />
             <span>{caseData.court}</span>
           </div>
         </div>
 
-        <p className="text-foreground/80 text-sm leading-relaxed mb-4">
+        {/* Summary - Dark Gray Sans-Serif */}
+        <p className="text-foreground/75 text-sm leading-relaxed font-sans">
           {caseData.summary}
         </p>
-
-        <div className="flex items-center justify-between pt-3 border-t border-border">
-          <span className="text-xs text-muted-foreground font-medium">
-            Quick Citation
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopyCitation}
-            className="gap-2 text-primary hover:bg-primary hover:text-primary-foreground border-primary/30"
-          >
-            {copied ? (
-              <>
-                <Check className="h-4 w-4 text-emerald-600" />
-                <span>Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4" />
-                <span>One-Click Cite</span>
-              </>
-            )}
-          </Button>
-        </div>
       </div>
+
+      {/* Full-Width Quick Cite Button */}
+      <button
+        onClick={handleCopyCitation}
+        className={`
+          w-full py-4 px-5 flex items-center justify-center gap-2 
+          font-medium text-sm transition-all duration-200
+          ${isHovered ? "bg-navy-light" : "bg-navy"} 
+          text-white
+        `}
+      >
+        {copied ? (
+          <>
+            <Check className="h-4 w-4" />
+            <span>Citation Copied!</span>
+          </>
+        ) : (
+          <>
+            <Copy className="h-4 w-4" />
+            <span>Quick Cite</span>
+          </>
+        )}
+      </button>
     </article>
   );
 };

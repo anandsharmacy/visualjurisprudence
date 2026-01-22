@@ -7,7 +7,7 @@ export const sampleCases: CaseData[] = [
     citation: "567 U.S. 234",
     year: 2023,
     court: "Supreme Court",
-    verdict: "Affirmed",
+    verdict: "Allowed",
     summary: "The Court held that employers must provide reasonable accommodations for employees with disabilities, upholding the lower court's decision on workplace accessibility requirements.",
   },
   {
@@ -51,8 +51,8 @@ export const sampleCases: CaseData[] = [
     name: "Thompson v. Regional Healthcare Systems",
     citation: "678 N.E.2d 123",
     year: 2021,
-    court: "Appellate Court",
-    verdict: "Affirmed",
+    court: "High Court",
+    verdict: "Allowed",
     summary: "Medical malpractice verdict affirmed, with the court finding sufficient evidence of negligence in the hospital's failure to follow established diagnostic protocols.",
   },
   {
@@ -70,7 +70,7 @@ export const sampleCases: CaseData[] = [
     citation: "789 F.Supp.3d 234",
     year: 2023,
     court: "District Court",
-    verdict: "Affirmed",
+    verdict: "Allowed",
     summary: "Breach of contract judgment affirmed, awarding substantial damages for failure to deliver goods according to international trade agreement specifications.",
   },
 ];

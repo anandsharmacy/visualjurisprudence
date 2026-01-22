@@ -8,6 +8,7 @@ import { sampleCases } from "@/data/sampleCases";
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set());
+  const [yearRange, setYearRange] = useState<[number, number]>([2015, 2024]);
 
   const handleFilterChange = (filterId: string) => {
     setSelectedFilters((prev) => {
@@ -23,6 +24,7 @@ const Index = () => {
 
   const handleClearFilters = () => {
     setSelectedFilters(new Set());
+    setYearRange([2015, 2024]);
   };
 
   const filteredCases = useMemo(() => {
@@ -40,30 +42,66 @@ const Index = () => {
       );
     }
 
-    // Filter by selected filters
+    // Filter by year range
+    results = results.filter(
+      (c) => c.year >= yearRange[0] && c.year <= yearRange[1]
+    );
+
+    // Filter by selected filters (court level and verdict type)
     if (selectedFilters.size > 0) {
       results = results.filter((c) => {
-        // Year filter
-        if (selectedFilters.has(c.year.toString())) return true;
-        
         // Court level filter
         const courtMap: Record<string, string> = {
           "Supreme Court": "supreme",
+          "High Court": "high",
           "Appellate Court": "appellate",
           "District Court": "district",
           "State Court": "state",
         };
-        if (selectedFilters.has(courtMap[c.court])) return true;
         
         // Verdict filter
-        if (selectedFilters.has(c.verdict.toLowerCase())) return true;
+        const verdictMap: Record<string, string> = {
+          "Allowed": "allowed",
+          "Dismissed": "dismissed",
+          "Remanded": "remanded",
+          "Reversed": "reversed",
+          "Settled": "settled",
+        };
+
+        const courtFilterActive = selectedFilters.has(courtMap[c.court]);
+        const verdictFilterActive = selectedFilters.has(verdictMap[c.verdict]);
+
+        // Check if any court filters are selected
+        const hasCourtFilters = ["supreme", "high", "appellate", "district", "state"].some(
+          (court) => selectedFilters.has(court)
+        );
         
-        return false;
+        // Check if any verdict filters are selected
+        const hasVerdictFilters = ["allowed", "dismissed", "remanded", "reversed", "settled"].some(
+          (verdict) => selectedFilters.has(verdict)
+        );
+
+        // If both types of filters exist, case must match at least one from each
+        if (hasCourtFilters && hasVerdictFilters) {
+          return courtFilterActive && verdictFilterActive;
+        }
+        
+        // If only court filters exist
+        if (hasCourtFilters) {
+          return courtFilterActive;
+        }
+        
+        // If only verdict filters exist
+        if (hasVerdictFilters) {
+          return verdictFilterActive;
+        }
+
+        return true;
       });
     }
 
     return results;
-  }, [searchTerm, selectedFilters]);
+  }, [searchTerm, selectedFilters, yearRange]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -73,6 +111,8 @@ const Index = () => {
           selectedFilters={selectedFilters}
           onFilterChange={handleFilterChange}
           onClearAll={handleClearFilters}
+          yearRange={yearRange}
+          onYearRangeChange={setYearRange}
         />
         <main className="flex-1 p-6 overflow-auto">
           <div className="max-w-6xl mx-auto space-y-6">
