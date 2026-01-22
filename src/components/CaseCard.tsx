@@ -10,6 +10,7 @@ export interface CaseData {
   name: string;
   citation: string;
   year: number;
+  lastHearingDate?: string; // Format: YYYY-MM-DD
   court: string;
   verdict: string;
   summary: string;
