@@ -238,6 +238,8 @@ const Dashboard = () => {
         onAddCase={handleAddCase}
         showAddButton={!showAddForm}
         canAddCases={canAddCases}
+        userName={profile?.full_name}
+        yearsOfExperience={profile?.years_of_experience}
       />
       <div className="flex flex-1 w-full">
         <FilterSidebar
