@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Scale, Plus, LogOut, ShieldAlert, User, Briefcase, UserCircle } from "lucide-react";
+import { Scale, Plus, LogOut, ShieldAlert, User, Briefcase, UserCircle, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ interface HeaderProps {
   userName?: string;
   yearsOfExperience?: number | null;
   onUpdateExperience?: (years: number) => Promise<void>;
+  isAdmin?: boolean;
 }
 
 const Header = ({ 
@@ -27,7 +28,8 @@ const Header = ({
   canAddCases = true,
   userName,
   yearsOfExperience,
-  onUpdateExperience
+  onUpdateExperience,
+  isAdmin = false
 }: HeaderProps) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
@@ -87,6 +89,32 @@ const Header = ({
                   {getExperienceLabel(yearsOfExperience)}
                 </Badge>
               </div>
+            )}
+
+            {/* Admin Dashboard Button */}
+            {isAdmin && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => navigate("/admin")}
+                      className="
+                        flex items-center gap-2 px-3 py-2.5
+                        bg-purple-600 text-white font-medium
+                        border-2 border-purple-400 rounded-lg
+                        transition-all duration-200
+                        hover:bg-purple-700 hover:border-purple-500
+                      "
+                    >
+                      <Shield className="h-5 w-5" />
+                      <span className="hidden lg:inline">Admin</span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="bg-navy text-white">
+                    <p>Admin Dashboard</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
 
             {/* View Profile Button */}

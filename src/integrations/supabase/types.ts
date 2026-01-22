@@ -145,18 +145,7 @@ export type Database = {
       }
     }
     Views: {
-      pending_approvals: {
-        Row: {
-          approval_status: string | null
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          id: string | null
-          user_id: string | null
-          years_of_experience: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       has_role: {
