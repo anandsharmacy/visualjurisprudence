@@ -76,6 +76,11 @@ const Auth = () => {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     if (isSignUp) {
+      // Store user expertise for personalized filtering
+      localStorage.setItem("userExpertise", JSON.stringify(selectedExpertise));
+      localStorage.setItem("userYearsExperience", yearsOfExperience);
+      localStorage.setItem("userName", fullName);
+      
       toast.success("Account created successfully!", {
         description: "Welcome to Visual Jurisprudence Dashboard",
       });
