@@ -55,6 +55,11 @@ export const useLegalCases = () => {
     verdict: string;
     summary: string;
     tags?: string[];
+    precedent_strength?: number;
+    citation_risk?: string;
+    outcome_alignment?: string;
+    ratio_decidendi?: string;
+    cited_by_count?: number;
   }) => {
     if (!user) {
       toast.error("You must be logged in to add a case");
@@ -62,8 +67,18 @@ export const useLegalCases = () => {
     }
 
     const { data, error } = await supabase.from("legal_cases").insert({
-      ...caseData,
+      name: caseData.name,
+      citation: caseData.citation,
+      year: caseData.year,
+      court: caseData.court,
+      verdict: caseData.verdict,
+      summary: caseData.summary,
       tags: caseData.tags || [],
+      precedent_strength: caseData.precedent_strength ?? 75,
+      citation_risk: caseData.citation_risk ?? 'safe',
+      outcome_alignment: caseData.outcome_alignment ?? 'neutral',
+      ratio_decidendi: caseData.ratio_decidendi,
+      cited_by_count: caseData.cited_by_count ?? 0,
       created_by: user.id,
     }).select().single();
 
