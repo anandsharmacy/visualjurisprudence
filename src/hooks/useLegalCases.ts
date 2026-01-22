@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 export interface LegalCase {
   id: string;
@@ -33,7 +34,7 @@ export const useLegalCases = () => {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching cases:", error);
+      logger.error("Error fetching cases:", error);
       toast.error("Failed to load cases");
     } else {
       setCases(data || []);
@@ -83,7 +84,7 @@ export const useLegalCases = () => {
     }).select().single();
 
     if (error) {
-      console.error("Error adding case:", error);
+      logger.error("Error adding case:", error);
       toast.error("Failed to add case");
       return { error };
     }

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 interface AuthContextType {
   user: User | null;
@@ -68,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (profileError) {
-        console.error("Profile creation error:", profileError);
+        logger.error("Profile creation error:", profileError);
         return { error: profileError };
       }
 
@@ -84,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .insert(expertiseRows);
 
         if (expertiseError) {
-          console.error("Expertise insertion error:", expertiseError);
+          logger.error("Expertise insertion error:", expertiseError);
           return { error: expertiseError };
         }
       }

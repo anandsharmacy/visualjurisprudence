@@ -2,6 +2,8 @@ import { useState, useRef, useCallback } from "react";
 import { Upload, FileText, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import * as pdfjsLib from "pdfjs-dist";
+import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 // FORCE the worker to load from unpkg to fix version mismatch/bundling errors
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
@@ -53,13 +55,20 @@ const PdfDropzone = ({ onDataExtracted }: PdfDropzoneProps) => {
   };
 
   const analyzeCaseText = async (text: string): Promise<ExtractedCaseData> => {
+    // Get the current session token for authenticated requests
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.access_token) {
+      throw new Error("You must be logged in to analyze PDFs");
+    }
+
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-case-pdf`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ text }),
       }
@@ -67,6 +76,9 @@ const PdfDropzone = ({ onDataExtracted }: PdfDropzoneProps) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        throw new Error("Session expired. Please log in again.");
+      }
       if (response.status === 429) {
         throw new Error("Rate limit exceeded. Please try again later.");
       }
@@ -116,10 +128,11 @@ const PdfDropzone = ({ onDataExtracted }: PdfDropzoneProps) => {
         setFileName("");
       }, 3000);
     } catch (error) {
-      console.error("PDF processing error:", error);
+      logger.error("PDF processing error:", error);
       setStatus("error");
-      setErrorMessage(error instanceof Error ? error.message : "Failed to process PDF");
-      toast.error(error instanceof Error ? error.message : "Failed to process PDF");
+      const message = error instanceof Error ? error.message : "Failed to process PDF";
+      setErrorMessage(message);
+      toast.error(message);
     }
   }, [onDataExtracted]);
 
