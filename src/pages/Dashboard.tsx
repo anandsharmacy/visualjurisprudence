@@ -3,12 +3,14 @@ import Header from "@/components/Header";
 import FilterSidebar from "@/components/FilterSidebar";
 import SearchBar from "@/components/SearchBar";
 import ResultsGrid from "@/components/ResultsGrid";
+import AddCaseForm from "@/components/AddCaseForm";
 import { sampleCases } from "@/data/sampleCases";
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set());
   const [yearRange, setYearRange] = useState<[number, number]>([2015, 2024]);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const handleFilterChange = (filterId: string) => {
     setSelectedFilters((prev) => {
@@ -106,7 +108,10 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+      <Header 
+        onAddCase={() => setShowAddForm(true)} 
+        showAddButton={!showAddForm}
+      />
       <div className="flex flex-1 w-full">
         <FilterSidebar
           selectedFilters={selectedFilters}
@@ -116,10 +121,17 @@ const Dashboard = () => {
           onYearRangeChange={setYearRange}
         />
         <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-6xl mx-auto space-y-6">
-            <SearchBar value={searchTerm} onChange={setSearchTerm} />
-            <ResultsGrid cases={filteredCases} searchTerm={searchTerm} />
-          </div>
+          {showAddForm ? (
+            <AddCaseForm
+              onCancel={() => setShowAddForm(false)}
+              onSubmit={() => setShowAddForm(false)}
+            />
+          ) : (
+            <div className="max-w-6xl mx-auto space-y-6">
+              <SearchBar value={searchTerm} onChange={setSearchTerm} />
+              <ResultsGrid cases={filteredCases} searchTerm={searchTerm} />
+            </div>
+          )}
         </main>
       </div>
     </div>
