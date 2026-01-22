@@ -9,6 +9,7 @@ export interface LegalCase {
   name: string;
   citation: string;
   year: number;
+  last_hearing_date: string | null;
   court: string;
   verdict: string;
   summary: string;
@@ -52,6 +53,7 @@ export const useLegalCases = () => {
     name: string;
     citation: string;
     year: number;
+    last_hearing_date?: string;
     court: string;
     verdict: string;
     summary: string;
@@ -71,6 +73,7 @@ export const useLegalCases = () => {
       name: caseData.name,
       citation: caseData.citation,
       year: caseData.year,
+      last_hearing_date: caseData.last_hearing_date || null,
       court: caseData.court,
       verdict: caseData.verdict,
       summary: caseData.summary,

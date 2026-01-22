@@ -136,7 +136,7 @@ const Dashboard = () => {
       name: c.name,
       citation: c.citation,
       year: c.year,
-      lastHearingDate: (c as any).lastHearingDate ?? undefined,
+      lastHearingDate: c.last_hearing_date ?? undefined,
       court: c.court,
       verdict: c.verdict,
       summary: c.summary,

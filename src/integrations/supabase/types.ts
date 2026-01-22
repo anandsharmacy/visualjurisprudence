@@ -23,6 +23,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          last_hearing_date: string | null
           name: string
           outcome_alignment: string | null
           precedent_strength: number | null
@@ -41,6 +42,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          last_hearing_date?: string | null
           name: string
           outcome_alignment?: string | null
           precedent_strength?: number | null
@@ -59,6 +61,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          last_hearing_date?: string | null
           name?: string
           outcome_alignment?: string | null
           precedent_strength?: number | null
