@@ -7,6 +7,7 @@ interface ResultsGridProps {
   selectedCaseIds?: Set<string>;
   onToggleCaseSelect?: (caseData: CaseData) => void;
   maxSelectionsReached?: boolean;
+  onTrackView?: (caseId: string, tags: string[]) => void;
 }
 
 const ResultsGrid = ({ 
@@ -14,7 +15,8 @@ const ResultsGrid = ({
   searchTerm, 
   selectedCaseIds = new Set(), 
   onToggleCaseSelect,
-  maxSelectionsReached = false 
+  maxSelectionsReached = false,
+  onTrackView 
 }: ResultsGridProps) => {
   if (cases.length === 0) {
     return (
@@ -52,6 +54,7 @@ const ResultsGrid = ({
             isSelected={selectedCaseIds.has(caseData.id)}
             onToggleSelect={onToggleCaseSelect}
             selectionDisabled={maxSelectionsReached && !selectedCaseIds.has(caseData.id)}
+            onTrackView={onTrackView}
           />
         ))}
       </div>
